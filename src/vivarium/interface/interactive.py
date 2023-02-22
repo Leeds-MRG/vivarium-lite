@@ -42,25 +42,6 @@ class InteractiveContext(SimulationContext):
         super().setup()
         self.initialize_simulants()
 
-    def step(self, step_size: Timedelta = None):
-        """Advance the simulation one step.
-
-        Parameters
-        ----------
-        step_size
-            An optional size of step to take. Must be the same type as the
-            simulation clock's step size (usually a pandas.Timedelta).
-        """
-        old_step_size = self._clock.step_size
-        if step_size is not None:
-            if not isinstance(step_size, type(self._clock.step_size)):
-                raise ValueError(
-                    f"Provided time must be an instance of {type(self._clock.step_size)}"
-                )
-            self._clock._step_size = step_size
-        super().step()
-        self._clock._step_size = old_step_size
-
     def run(self, with_logging: bool = True) -> int:
         """Run the simulation for the duration specified in the configuration.
 
@@ -77,27 +58,6 @@ class InteractiveContext(SimulationContext):
 
         """
         return self.run_until(self._clock.stop_time, with_logging=with_logging)
-
-    def run_for(self, duration: Timedelta, with_logging: bool = True) -> int:
-        """Run the simulation for the given time duration.
-
-        Parameters
-        ----------
-        duration
-            The length of time to run the simulation for. Should be the same
-            type as the simulation clock's step size (usually a pandas
-            Timedelta).
-        with_logging
-            Whether or not to log the simulation steps. Only works in an ipython
-            environment.
-
-        Returns
-        -------
-        int
-            The number of steps the simulation took.
-
-        """
-        return self.run_until(self._clock.time + duration, with_logging=with_logging)
 
     def run_until(self, end_time: Time, with_logging: bool = True) -> int:
         """Run the simulation until the provided end time.
@@ -152,6 +112,25 @@ class InteractiveContext(SimulationContext):
             for _ in range(number_of_steps):
                 self.step(step_size)
 
+    def step(self, step_size: Timedelta = None):
+        """Advance the simulation one step.
+
+        Parameters
+        ----------
+        step_size
+            An optional size of step to take. Must be the same type as the
+            simulation clock's step size (usually a pandas.Timedelta).
+        """
+        old_step_size = self._clock.step_size
+        if step_size is not None:
+            if not isinstance(step_size, type(self._clock.step_size)):
+                raise ValueError(
+                    f"Provided time must be an instance of {type(self._clock.step_size)}"
+                )
+            self._clock._step_size = step_size
+        super().step()
+        self._clock._step_size = old_step_size
+
     def get_population(self, untracked: bool = False) -> pd.DataFrame:
         """Get a copy of the population state table.
 
@@ -163,76 +142,6 @@ class InteractiveContext(SimulationContext):
 
         """
         return self._population.get_population(untracked)
-
-    def list_values(self) -> List[str]:
-        """List the names of all pipelines in the simulation."""
-        return list(self._values.keys())
-
-    def get_value(self, value_pipeline_name: str) -> Pipeline:
-        """Get the value pipeline associated with the given name."""
-        return self._values.get_value(value_pipeline_name)
-
-    def list_events(self) -> List[str]:
-        """List all event types registered with the simulation."""
-        return self._events.list_events()
-
-    def get_listeners(self, event_type: str) -> List[Callable]:
-        """Get all listeners of a particular type of event.
-
-        Available event types can be found by calling
-        :func:`InteractiveContext.list_events`.
-
-        Parameters
-        ----------
-        event_type
-            The type of event to grab the listeners for.
-
-        """
-        if event_type not in self._events:
-            raise ValueError(f"No event {event_type} in system.")
-        return self._events.get_listeners(event_type)
-
-    def get_emitter(self, event_type: str) -> Callable:
-        """Get the callable that emits the given type of events.
-
-        Available event types can be found by calling
-        :func:`InteractiveContext.list_events`.
-
-        Parameters
-        ----------
-        event_type
-            The type of event to grab the listeners for.
-
-        """
-        if event_type not in self._events:
-            raise ValueError(f"No event {event_type} in system.")
-        return self._events.get_emitter(event_type)
-
-    def list_components(self) -> Dict[str, Any]:
-        """Get a mapping of component names to components currently in the simulation.
-
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary mapping component names to components.
-
-        """
-        return self._component_manager.list_components()
-
-    def get_component(self, name: str) -> Any:
-        """Get the component in the simulation that has ``name``, if present.
-        Names are guaranteed to be unique.
-
-        Parameters
-        ----------
-        name
-            A component name.
-        Returns
-        -------
-            A component that has the name ``name`` else None.
-
-        """
-        return self._component_manager.get_component(name)
 
     def __repr__(self):
         return "InteractiveContext()"
