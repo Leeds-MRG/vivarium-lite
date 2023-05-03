@@ -173,39 +173,5 @@ def build_table(value, year_start, year_end, columns=("age", "year", "sex", "val
     )
 
 
-def make_dummy_column(name, initial_value):
-    class DummyColumnMaker:
-        @property
-        def name(self):
-            return "dummy_column_maker"
-
-        def setup(self, builder):
-            self.population_view = builder.population.get_view([name])
-            builder.population.initializes_simulants(self.make_column, creates_columns=[name])
-
-        def make_column(self, pop_data):
-            self.population_view.update(
-                pd.Series(initial_value, index=pop_data.index, name=name)
-            )
-
-        def __repr__(self):
-            return f"dummy_column(name={name}, initial_value={initial_value})"
-
-    return DummyColumnMaker()
-
-
-def get_randomness(
-    key="test", clock=lambda: pd.Timestamp(1990, 7, 2), seed=12345, for_initialization=False
-):
-    return randomness.RandomnessStream(
-        key, clock, seed=seed, for_initialization=for_initialization
-    )
-
-
-def reset_mocks(mocks):
-    for mock in mocks:
-        mock.reset_mock()
-
-
 def metadata(file_path):
     return {"layer": "override", "source": str(Path(file_path).resolve())}

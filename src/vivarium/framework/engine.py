@@ -313,19 +313,3 @@ class Builder:
 
     def __repr__(self):
         return "Builder()"
-
-
-def run_simulation(
-    model_specification: Union[str, Path, ConfigTree] = None,
-    components: Union[List, Dict, ConfigTree] = None,
-    configuration: Union[Dict, ConfigTree] = None,
-    plugin_configuration: Union[Dict, ConfigTree] = None,
-):
-    simulation = SimulationContext(
-        model_specification, components, configuration, plugin_configuration
-    )
-    simulation.setup()
-    simulation.initialize_simulants()
-    simulation.run()
-    simulation.finalize()
-    return simulation

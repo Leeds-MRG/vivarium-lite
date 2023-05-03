@@ -472,28 +472,6 @@ class RandomnessStream:
         self._manager = manager
         self._for_initialization = for_initialization
 
-    def copy_with_additional_key(self, key: Any) -> "RandomnessStream":
-        """Creates a copy of this stream with a permutation of it's random seed.
-
-        Parameters
-        ----------
-        key
-            The additional key to describe the new stream with.
-
-        Returns
-        -------
-        RandomnessStream
-            A new RandomnessStream with a combined key.
-
-        """
-        copy_key = "_".join([self.key, key])
-        if self._for_initialization:
-            raise RandomnessError("Initialization streams cannot be copied.")
-        elif self._manager:
-            return self._manager.get_randomness_stream(copy_key)
-        else:
-            return RandomnessStream(copy_key, self.clock, self.seed, self.index_map)
-
     @property
     def name(self):
         return f"randomness_stream_{self.key}"
