@@ -19,7 +19,6 @@ import pandas as pd
 
 from vivarium.framework.engine import SimulationContext
 from vivarium.framework.time import Time, Timedelta
-from vivarium.framework.values import Pipeline
 
 from .utilities import log_progress, run_from_ipython
 
@@ -163,76 +162,6 @@ class InteractiveContext(SimulationContext):
 
         """
         return self._population.get_population(untracked)
-
-    def list_values(self) -> List[str]:
-        """List the names of all pipelines in the simulation."""
-        return list(self._values.keys())
-
-    def get_value(self, value_pipeline_name: str) -> Pipeline:
-        """Get the value pipeline associated with the given name."""
-        return self._values.get_value(value_pipeline_name)
-
-    def list_events(self) -> List[str]:
-        """List all event types registered with the simulation."""
-        return self._events.list_events()
-
-    def get_listeners(self, event_type: str) -> List[Callable]:
-        """Get all listeners of a particular type of event.
-
-        Available event types can be found by calling
-        :func:`InteractiveContext.list_events`.
-
-        Parameters
-        ----------
-        event_type
-            The type of event to grab the listeners for.
-
-        """
-        if event_type not in self._events:
-            raise ValueError(f"No event {event_type} in system.")
-        return self._events.get_listeners(event_type)
-
-    def get_emitter(self, event_type: str) -> Callable:
-        """Get the callable that emits the given type of events.
-
-        Available event types can be found by calling
-        :func:`InteractiveContext.list_events`.
-
-        Parameters
-        ----------
-        event_type
-            The type of event to grab the listeners for.
-
-        """
-        if event_type not in self._events:
-            raise ValueError(f"No event {event_type} in system.")
-        return self._events.get_emitter(event_type)
-
-    def list_components(self) -> Dict[str, Any]:
-        """Get a mapping of component names to components currently in the simulation.
-
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary mapping component names to components.
-
-        """
-        return self._component_manager.list_components()
-
-    def get_component(self, name: str) -> Any:
-        """Get the component in the simulation that has ``name``, if present.
-        Names are guaranteed to be unique.
-
-        Parameters
-        ----------
-        name
-            A component name.
-        Returns
-        -------
-            A component that has the name ``name`` else None.
-
-        """
-        return self._component_manager.get_component(name)
 
     def __repr__(self):
         return "InteractiveContext()"
