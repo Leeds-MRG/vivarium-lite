@@ -13,7 +13,6 @@ See the associated tutorials for :ref:`running <interactive_tutorial>` and
 
 """
 from math import ceil
-from typing import Any, Callable, Dict, List
 
 import pandas as pd
 
