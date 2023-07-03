@@ -13,7 +13,6 @@ See the associated tutorials for :ref:`running <interactive_tutorial>` and
 
 """
 from math import ceil
-from typing import Any, Callable, Dict, List
 
 import pandas as pd
 
@@ -77,26 +76,6 @@ class InteractiveContext(SimulationContext):
         """
         return self.run_until(self._clock.stop_time, with_logging=with_logging)
 
-    def run_for(self, duration: Timedelta, with_logging: bool = True) -> int:
-        """Run the simulation for the given time duration.
-
-        Parameters
-        ----------
-        duration
-            The length of time to run the simulation for. Should be the same
-            type as the simulation clock's step size (usually a pandas
-            Timedelta).
-        with_logging
-            Whether or not to log the simulation steps. Only works in an ipython
-            environment.
-
-        Returns
-        -------
-        int
-            The number of steps the simulation took.
-
-        """
-        return self.run_until(self._clock.time + duration, with_logging=with_logging)
 
     def run_until(self, end_time: Time, with_logging: bool = True) -> int:
         """Run the simulation until the provided end time.

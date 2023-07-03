@@ -84,29 +84,6 @@ class InteractiveError(VivariumError):
     pass
 
 
-def raise_if_not_setup(system_type):
-    type_error_map = {
-        "run": "Simulation must be setup before it can be run",
-        "value": "Value pipeline configuration is not complete until the simulation is setup.",
-        "event": "Event configuration is not complete until the simulation is setup.",
-        "component": "Component configuration is not complete until the simulation is setup.",
-        "population": "No population exists until the simulation is setup.",
-    }
-    err_msg = type_error_map[system_type]
-
-    def method_wrapper(context_method):
-        @functools.wraps(context_method)
-        def wrapped_method(*args, **kwargs):
-            instance = args[0]
-            if not instance._setup:
-                raise InteractiveError(err_msg)
-            return context_method(*args, **kwargs)
-
-        return wrapped_method
-
-    return method_wrapper
-
-
 def get_output_model_name_string(
     artifact_path: Union[str, Path],
     model_spec_path: Union[str, Path],

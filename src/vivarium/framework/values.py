@@ -60,33 +60,6 @@ def replace_combiner(value: Any, mutator: Callable, *args: Any, **kwargs: Any) -
     return mutator(*args, **kwargs)
 
 
-def list_combiner(value: List, mutator: Callable, *args: Any, **kwargs: Any) -> List:
-    """Aggregates source and mutator output into a list.
-
-    This combiner is meant to be used with a post-processor that does some
-    kind of reduce operation like summing all values in the list.
-
-    Parameters
-    ----------
-    value
-        A list of all values provided by the source and prior mutators in the
-        pipeline.
-    mutator
-        A callable that returns some portion of this pipeline's final value.
-    args, kwargs
-        The same args and kwargs provided during the invocation of the
-        pipeline.
-
-    Returns
-    -------
-        The input list with new mutator portion of the pipeline value
-        appended to it.
-
-    """
-    value.append(mutator(*args, **kwargs))
-    return value
-
-
 def rescale_post_processor(value: NumberLike, time_step: pd.Timedelta):
     """Rescales annual rates to time-step appropriate rates.
 
@@ -111,53 +84,6 @@ def rescale_post_processor(value: NumberLike, time_step: pd.Timedelta):
 
     """
     return from_yearly(value, time_step)
-
-
-def union_post_processor(values: List[NumberLike], _) -> NumberLike:
-    """Computes a probability on the union of the sample spaces in the values.
-
-    Given a list of values where each value is a probability of an independent
-    event, this post processor computes the probability of the union of the
-    events.
-
-    .. list-table::
-       :width: 100%
-       :widths: 1 3
-
-       * - :math:`p_x`
-         - Probability of event x
-       * - :math:`1 - p_x`
-         - Probability of not event x
-       * - :math:`\prod_x(1 - p_x)`
-         - Probability of not any events x
-       * - :math:`1 - \prod_x(1 - p_x)`
-         - Probability of any event x
-
-    Parameters
-    ----------
-    values
-        A list of independent proportions or probabilities, either
-        as numbers or as a something we can broadcast addition and
-        multiplication over.
-
-    Returns
-    -------
-    Union[numpy.ndarray, pandas.Series, pandas.DataFrame, numbers.Number]
-        The probability over the union of the sample spaces represented
-        by the original probabilities.
-
-    """
-    # if there is only one value, return the value
-    if len(values) == 1:
-        return values[0]
-
-    # if there are multiple values, calculate the joint value
-    product = 1
-    for v in values:
-        new_value = 1 - v
-        product = product * new_value
-    joint_value = 1 - product
-    return joint_value
 
 
 class Pipeline:

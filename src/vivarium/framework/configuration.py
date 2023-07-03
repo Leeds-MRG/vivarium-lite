@@ -72,10 +72,6 @@ def validate_model_specification_file(file_path: Union[str, Path]) -> None:
         )
 
 
-def build_simulation_configuration() -> ConfigTree:
-    return _get_default_specification().configuration
-
-
 def _get_default_specification():
     default_config_layers = [
         "base",
