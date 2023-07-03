@@ -179,15 +179,6 @@ class SimulationContext:
         while self._clock.time < self._clock.stop_time:
             self.step()
 
-    def finalize(self):
-        self._lifecycle.set_state("simulation_end")
-        self.end_emitter(self._population.get_population(True).index)
-        unused_config_keys = self.configuration.unused_keys()
-        if unused_config_keys:
-            logger.debug(
-                f"Some configuration keys not used during run: {unused_config_keys}."
-            )
-
     def report(self, print_results=True):
         self._lifecycle.set_state("report")
         metrics = self._values.get_value("metrics")(
@@ -314,18 +305,3 @@ class Builder:
     def __repr__(self):
         return "Builder()"
 
-
-def run_simulation(
-    model_specification: Union[str, Path, ConfigTree] = None,
-    components: Union[List, Dict, ConfigTree] = None,
-    configuration: Union[Dict, ConfigTree] = None,
-    plugin_configuration: Union[Dict, ConfigTree] = None,
-):
-    simulation = SimulationContext(
-        model_specification, components, configuration, plugin_configuration
-    )
-    simulation.setup()
-    simulation.initialize_simulants()
-    simulation.run()
-    simulation.finalize()
-    return simulation

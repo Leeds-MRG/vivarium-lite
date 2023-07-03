@@ -150,22 +150,6 @@ class Transition:
     def setup(self, builder: "Builder") -> None:
         pass
 
-    def set_active(self, index: pd.Index) -> None:
-        if self._active_index is None:
-            raise ValueError(
-                "This transition is not triggered.  An active index cannot be set or modified."
-            )
-        else:
-            self._active_index = self._active_index.union(pd.Index(index))
-
-    def set_inactive(self, index: pd.Index) -> None:
-        if self._active_index is None:
-            raise ValueError(
-                "This transition is not triggered.  An active index cannot be set or modified."
-            )
-        else:
-            self._active_index = self._active_index.difference(pd.Index(index))
-
     def probability(self, index: pd.Index) -> pd.Series:
         if self._active_index is None:
             return self._probability(index)
@@ -247,41 +231,7 @@ class State:
         population_view.update(pd.Series(self.state_id, index=index))
         self._transition_side_effect(index, event_time)
 
-    def cleanup_effect(self, index: pd.Index, event_time: "Time") -> None:
-        self._cleanup_effect(index, event_time)
-
-    def add_transition(
-        self,
-        output: "State",
-        probability_func: Callable[[pd.Index], pd.Series] = lambda index: pd.Series(
-            1.0, index=index
-        ),
-        triggered=Trigger.NOT_TRIGGERED,
-    ) -> Transition:
-        """Builds a transition from this state to the given state.
-
-        Parameters
-        ----------
-        output
-            The end state after the transition.
-
-        Returns
-        -------
-        Transition
-            The created transition object.
-
-        """
-        t = Transition(self, output, probability_func=probability_func, triggered=triggered)
-        self.transition_set.append(t)
-        return t
-
-    def allow_self_transitions(self) -> None:
-        self.transition_set.allow_null_transition = True
-
     def _transition_side_effect(self, index: pd.Index, event_time: "Time") -> None:
-        pass
-
-    def _cleanup_effect(self, index: pd.Index, event_time: "Time") -> None:
         pass
 
     def __repr__(self):
@@ -293,11 +243,6 @@ class Transient:
     """Used to tell _next_state to transition a second time."""
 
     pass
-
-
-class TransientState(State, Transient):
-    def __repr__(self):
-        return f"TransientState({self.state_id})"
 
 
 class TransitionSet:
@@ -451,75 +396,3 @@ class TransitionSet:
 
     def __hash__(self):
         return hash(id(self))
-
-
-class Machine:
-    """A collection of states and transitions between those states.
-
-    Attributes
-    ----------
-    states
-        The collection of states represented by this state machine.
-    state_column
-        A label for the piece of simulation state governed by this state machine.
-    population_view
-        A view of the internal state of the simulation.
-
-    """
-
-    def __init__(self, state_column: str, states: Iterable[State] = ()):
-        self.states = []
-        self.state_column = state_column
-        if states:
-            self.add_states(states)
-
-    @property
-    def name(self) -> str:
-        machine_type = self.__class__.__name__.lower()
-        return f"{machine_type}.{self.state_column}"
-
-    @property
-    def sub_components(self):
-        return self.states
-
-    def setup(self, builder: "Builder") -> None:
-        self.population_view = builder.population.get_view([self.state_column])
-
-    def add_states(self, states: Iterable[State]) -> None:
-        for state in states:
-            self.states.append(state)
-            state._model = self.state_column
-
-    def transition(self, index: pd.Index, event_time: "Time") -> None:
-        """Finds the population in each state and moves them to the next state.
-
-        Parameters
-        ----------
-        index
-            An iterable of integer labels for the simulants.
-        event_time
-            The time at which this transition occurs.
-
-        """
-        for state, affected in self._get_state_pops(index):
-            if not affected.empty:
-                state.next_state(
-                    affected.index,
-                    event_time,
-                    self.population_view.subview([self.state_column]),
-                )
-
-    def cleanup(self, index: pd.Index, event_time: "Time") -> None:
-        for state, affected in self._get_state_pops(index):
-            if not affected.empty:
-                state.cleanup_effect(affected.index, event_time)
-
-    def _get_state_pops(self, index: pd.Index) -> List[Tuple[State, pd.DataFrame]]:
-        population = self.population_view.get(index)
-        return [
-            (state, population[population[self.state_column] == state.state_id])
-            for state in self.states
-        ]
-
-    def __repr__(self):
-        return f"Machine(state_column= {self.state_column})"

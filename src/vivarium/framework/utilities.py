@@ -7,7 +7,6 @@ Collection of utility functions shared by the ``vivarium`` framework.
 
 """
 import functools
-from bdb import BdbQuit
 from importlib import import_module
 from typing import Any, Callable
 
@@ -38,25 +37,3 @@ def import_by_path(path: str) -> Callable:
     module_path, _, class_name = path.rpartition(".")
     return getattr(import_module(module_path), class_name)
 
-
-def handle_exceptions(func: Callable, logger: Any, with_debugger: bool) -> Callable:
-    """Drops a user into an interactive debugger if func raises an error."""
-
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except (BdbQuit, KeyboardInterrupt):
-            raise
-        except Exception as e:
-            logger.exception("Uncaught exception {}".format(e))
-            if with_debugger:
-                import pdb
-                import traceback
-
-                traceback.print_exc()
-                pdb.post_mortem()
-            else:
-                raise
-
-    return wrapped

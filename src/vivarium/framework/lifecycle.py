@@ -74,11 +74,6 @@ class LifeCycleState:
         """The name of the lifecycle state."""
         return self._name
 
-    @property
-    def entrance_count(self) -> int:
-        """The number of times this state has been entered."""
-        return self._entrance_count
-
     def add_next(self, next_state: "LifeCycleState", loop: bool = False):
         """Link this state to the next state in the simulation life cycle.
 
