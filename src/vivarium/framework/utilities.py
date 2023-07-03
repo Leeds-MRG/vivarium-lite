@@ -30,21 +30,6 @@ def rate_to_probability(rate):
     return 1 - np.exp(-rate)
 
 
-def probability_to_rate(probability):
-    return -np.log(1 - probability)
-
-
-def collapse_nested_dict(d, prefix=None):
-    results = []
-    for k, v in d.items():
-        cur_prefix = prefix + "." + k if prefix else k
-        if isinstance(v, dict):
-            results.extend(collapse_nested_dict(v, prefix=cur_prefix))
-        else:
-            results.append((cur_prefix, v))
-    return results
-
-
 def import_by_path(path: str) -> Callable:
     """Import a class or function given it's absolute path.
 
@@ -56,26 +41,3 @@ def import_by_path(path: str) -> Callable:
 
     module_path, _, class_name = path.rpartition(".")
     return getattr(import_module(module_path), class_name)
-
-
-def handle_exceptions(func: Callable, logger: Any, with_debugger: bool) -> Callable:
-    """Drops a user into an interactive debugger if func raises an error."""
-
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except (BdbQuit, KeyboardInterrupt):
-            raise
-        except Exception as e:
-            logger.exception("Uncaught exception {}".format(e))
-            if with_debugger:
-                import pdb
-                import traceback
-
-                traceback.print_exc()
-                pdb.post_mortem()
-            else:
-                raise
-
-    return wrapped
