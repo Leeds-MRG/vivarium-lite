@@ -59,30 +59,6 @@ class SimulationClock:
         self._time -= self.step_size
 
 
-class SimpleClock(SimulationClock):
-    """A unitless step-count based simulation clock."""
-
-    configuration_defaults = {
-        "time": {
-            "start": 0,
-            "end": 100,
-            "step_size": 1,
-        }
-    }
-
-    @property
-    def name(self):
-        return "simple_clock"
-
-    def setup(self, builder):
-        self._time = builder.configuration.time.start
-        self._stop_time = builder.configuration.time.end
-        self._step_size = builder.configuration.time.step_size
-
-    def __repr__(self):
-        return "SimpleClock()"
-
-
 def get_time_stamp(time):
     return pd.Timestamp(time["year"], time["month"], time["day"])
 
