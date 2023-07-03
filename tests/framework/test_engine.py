@@ -177,24 +177,4 @@ def test_SimulationContext_step(log, base_config, components):
     assert sim._clock.time == current_time + step_size
 
 
-def test_SimulationContext_finalize(base_config, components):
-    sim = SimulationContext(base_config, components)
-    listener = [c for c in components if "listener" in c.args][0]
-    sim.setup()
-    sim.initialize_simulants()
-    sim.step()
-    assert not listener.simulation_end_called
-    sim.finalize()
-    assert listener.simulation_end_called
 
-
-def test_SimulationContext_report(base_config, components):
-    sim = SimulationContext(base_config, components)
-    sim.setup()
-    sim.initialize_simulants()
-    sim.run()
-    sim.finalize()
-    metrics = sim.report()
-    assert metrics["test"] == len(
-        [c for c in sim._component_manager._components if isinstance(c, MockComponentB)]
-    )

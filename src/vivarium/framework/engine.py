@@ -18,13 +18,9 @@ Finally, there are a handful of wrapper methods that allow a user or user
 tools to easily setup and run a simulation.
 
 """
-import time
 from pathlib import Path
-from pprint import pformat
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 
-import numpy as np
-import pandas as pd
 from loguru import logger
 
 from vivarium.config_tree import ConfigTree
@@ -179,49 +175,6 @@ class SimulationContext:
         while self._clock.time < self._clock.stop_time:
             self.step()
 
-    def finalize(self):
-        self._lifecycle.set_state("simulation_end")
-        self.end_emitter(self._population.get_population(True).index)
-        unused_config_keys = self.configuration.unused_keys()
-        if unused_config_keys:
-            logger.debug(
-                f"Some configuration keys not used during run: {unused_config_keys}."
-            )
-
-    def report(self, print_results=True):
-        self._lifecycle.set_state("report")
-        metrics = self._values.get_value("metrics")(
-            self._population.get_population(True).index
-        )
-        if print_results:
-            logger.debug("\n" + pformat(metrics))
-            performance_metrics = self.get_performance_metrics()
-            performance_metrics = performance_metrics.to_string(
-                index=False,
-                float_format=lambda x: f"{x:.2f}",
-            )
-            logger.debug("\n" + performance_metrics)
-
-        return metrics
-
-    def get_performance_metrics(self) -> pd.DataFrame:
-        timing_dict = self._lifecycle.timings
-        total_time = np.sum([np.sum(v) for v in timing_dict.values()])
-        timing_dict["total"] = [total_time]
-        records = [
-            {
-                "Event": label,
-                "Count": len(ts),
-                "Mean time (s)": np.mean(ts),
-                "Std. dev. time (s)": np.std(ts),
-                "Total time (s)": sum(ts),
-                "% Total time": 100 * sum(ts) / total_time,
-            }
-            for label, ts in timing_dict.items()
-        ]
-        performance_metrics = pd.DataFrame(records)
-        return performance_metrics
-
     def add_components(self, component_list):
         """Adds new components to the simulation."""
         self._component_manager.add_components(component_list)
@@ -313,19 +266,3 @@ class Builder:
 
     def __repr__(self):
         return "Builder()"
-
-
-def run_simulation(
-    model_specification: Union[str, Path, ConfigTree] = None,
-    components: Union[List, Dict, ConfigTree] = None,
-    configuration: Union[Dict, ConfigTree] = None,
-    plugin_configuration: Union[Dict, ConfigTree] = None,
-):
-    simulation = SimulationContext(
-        model_specification, components, configuration, plugin_configuration
-    )
-    simulation.setup()
-    simulation.initialize_simulants()
-    simulation.run()
-    simulation.finalize()
-    return simulation
