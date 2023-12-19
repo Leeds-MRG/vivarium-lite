@@ -280,25 +280,6 @@ class EntityKey(str):
         """The full HDF path associated with this key."""
         return self.group + "/" + self.measure
 
-    def with_measure(self, measure: str) -> "EntityKey":
-        """Replaces this key's measure with the provided one.
-
-        Parameters
-        ----------
-        measure :
-            The measure to replace this key's measure with.
-
-        Returns
-        -------
-        EntityKey
-            A new EntityKey with the updated measure.
-
-        """
-        if self.name:
-            return EntityKey(f"{self.type}.{self.name}.{measure}")
-        else:
-            return EntityKey(f"{self.type}.{measure}")
-
     def __eq__(self, other: "EntityKey") -> bool:
         return isinstance(other, str) and str(self) == str(other)
 

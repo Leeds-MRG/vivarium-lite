@@ -150,22 +150,6 @@ class Transition:
     def setup(self, builder: "Builder") -> None:
         pass
 
-    def set_active(self, index: pd.Index) -> None:
-        if self._active_index is None:
-            raise ValueError(
-                "This transition is not triggered.  An active index cannot be set or modified."
-            )
-        else:
-            self._active_index = self._active_index.union(pd.Index(index))
-
-    def set_inactive(self, index: pd.Index) -> None:
-        if self._active_index is None:
-            raise ValueError(
-                "This transition is not triggered.  An active index cannot be set or modified."
-            )
-        else:
-            self._active_index = self._active_index.difference(pd.Index(index))
-
     def probability(self, index: pd.Index) -> pd.Series:
         if self._active_index is None:
             return self._probability(index)

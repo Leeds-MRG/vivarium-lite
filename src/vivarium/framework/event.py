@@ -214,41 +214,6 @@ class EventManager:
         """
         self.get_channel(name).listeners[priority].append(listener)
 
-    def get_listeners(self, name: str) -> Dict[int, List[Callable]]:
-        """Get  all listeners registered for the named event.
-
-        Parameters
-        ----------
-        name
-            The name of the event.
-
-        Returns
-        -------
-            A dictionary that maps each priority level of the named event's
-            listeners to a list of listeners at that level.
-        """
-        channel = self.get_channel(name)
-        return {
-            priority: listeners
-            for priority, listeners in enumerate(channel.listeners)
-            if listeners
-        }
-
-    def list_events(self) -> List[Event]:
-        """List all event names known to the event system.
-
-        Returns
-        -------
-        List[Event]
-            A list of all known event names.
-
-        Notes
-        -----
-        This value can change after setup if components dynamically create
-        new event labels.
-
-        """
-        return list(self._event_types.keys())
 
     def __contains__(self, item):
         return item in self._event_types

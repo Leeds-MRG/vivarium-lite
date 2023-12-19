@@ -18,7 +18,6 @@ import pandas as pd
 
 from vivarium.framework.engine import SimulationContext
 from vivarium.framework.time import Time, Timedelta
-from vivarium.framework.values import Pipeline
 
 from .utilities import log_progress, run_from_ipython
 
@@ -103,7 +102,7 @@ class InteractiveContext(SimulationContext):
         return iterations
 
     def take_steps(
-            self, number_of_steps: int = 1, step_size: Timedelta = None, with_logging: bool = True
+        self, number_of_steps: int = 1, step_size: Timedelta = None, with_logging: bool = True
     ):
         """Run the simulation for the given number of steps.
 
@@ -141,9 +140,6 @@ class InteractiveContext(SimulationContext):
         """
         return self._population.get_population(untracked)
 
-    def get_value(self, value_pipeline_name: str) -> Pipeline:
-        """Get the value pipeline associated with the given name."""
-        return self._values.get_value(value_pipeline_name)
-
+   
     def __repr__(self):
         return "InteractiveContext()"

@@ -189,15 +189,6 @@ class Artifact:
         self.remove(entity_key)
         self.write(entity_key, data)
 
-    def clear_cache(self):
-        """Clears the artifact's cache.
-
-        The artifact will cache data in memory to improve performance for
-        repeat access.
-
-        """
-        self._cache = {}
-
     def __iter__(self):
         return iter(self.keys)
 

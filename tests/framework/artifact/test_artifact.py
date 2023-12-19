@@ -355,21 +355,6 @@ def test_remove(hdf_mock, artifact_path):
     assert hdf_mock.remove.call_args_list == expected_calls
 
 
-def test_clear_cache(hdf_mock, artifact_path):
-    filter_terms = ["location == Global", "draw == 10"]
-    key = "population.structure"
-
-    a = Artifact(artifact_path, filter_terms)
-    a.clear_cache()
-
-    assert a._cache == {}
-
-    a._cache[key] = "data"
-    a.clear_cache()
-
-    assert a._cache == {}
-
-
 def test_loading_key_leaves_filters_unchanged(hdf_mock, artifact_path):
     # loading each key will drop the fake_filter from filter_terms for that key
     # make sure that artifact's filter terms stay the same though

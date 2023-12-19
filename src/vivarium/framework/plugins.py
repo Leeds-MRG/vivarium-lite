@@ -97,18 +97,6 @@ class PluginManager:
             self._plugins[name] = self._get(name)
         return self._plugins[name]["builder_interface"]
 
-    def get_core_controllers(self):
-        core_components = [
-            name for name in self._plugin_configuration["required"].keys()
-        ] + list(_MANAGERS.keys())
-        return {name: self.get_plugin(name) for name in core_components}
-
-    def get_core_interfaces(self):
-        core_components = [
-            name for name in self._plugin_configuration["required"].keys()
-        ] + list(_MANAGERS.keys())
-        return {name: self.get_plugin_interface(name) for name in core_components}
-
     def get_optional_controllers(self):
         return {
             name: self.get_plugin(name)
